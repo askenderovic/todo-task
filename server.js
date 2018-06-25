@@ -46,7 +46,7 @@ if (cluster.isMaster) {
 	// get an instance of the express Router
 	var router = express.Router();
 
-	router.route('/user')
+	router.route('/')
 		.get(function(req, res) {
 			var workerId = cluster.worker.id,
 				workerPid = cluster.worker.process.pid,
