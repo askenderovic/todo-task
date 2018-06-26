@@ -1,7 +1,6 @@
 const cluster		= require('cluster');
 const requestIp		= require('request-ip');
 const uuidv4		= require('uuid/v4');
-const sleep			= require('system-sleep');
 
 const port = process.env.PORT || 8081;
 
@@ -43,28 +42,34 @@ if (cluster.isMaster) {
 	// create a new Express application
 	var app	= express();
 
-	// get an instance of the express Router
+	// get an instace of the express Router
 	var router = express.Router();
 
 	router.route('/')
 		.get(function(req, res) {
-			var workerId = cluster.worker.id,
-				workerPid = cluster.worker.process.pid,
-				workerUuid = cluster.worker.process.env.uuid;
+			var worker = cluster.worker;
 
-			console.log(`Worker ${workerId} received request PID:${workerPid}, UUID:${workerUuid}`);
+			console.log(`Worker ${worker.id} received request UUID:${worker.process.env.uuid}`);
 
 			var user = {
 				"ua":	req.get('user-agent'),
 				"ip":	requestIp.getClientIp(req),
-				"uuid":	workerUuid
+				"uuid":	worker.process.env.uuid
 			};
 			
-			sleep(5000);
+			// task to put load on CPU core and simulate blockong of the event loop
+			function fibo (n) {
+				return n > 1 ? fibo(n - 1) + fibo(n - 2) : 1;
+			}
+			
+			fibo(40);
 	
 			res.statusCode = 200;
 			res.setHeader('Content-Type', 'application/json');
 			res.json( user );
+			
+			console.log(`Worker ${worker.id} sent response UUID:${worker.process.env.uuid}`);
+			
 		});
 
 	// all of routes will be prefixed with /api/v1
@@ -73,6 +78,6 @@ if (cluster.isMaster) {
 	// workers can share any TCP connection
 	app.listen(port);
 	
-	console.log(`Worker process ${process.pid} started RESTful API server on port ${port}`);
+	console.log(`Worker ${cluster.worker.id} started RESTful API server on port ${port}`);
 
 }
