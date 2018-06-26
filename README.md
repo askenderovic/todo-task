@@ -33,7 +33,7 @@ npm start
 
 ## Run as Docker application
 
-To build the image run the following command to build the Docker image. The -t flag lets tag the image so it's easier to find later using the docker images command:
+To build the image run the bellow command. The -t flag lets tag the image so it's easier to find later using the docker images command:
 
 ```
 $ docker build -t <your username>/todo-task .
